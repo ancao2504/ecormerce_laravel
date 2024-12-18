@@ -173,11 +173,10 @@ class MenuController extends Controller
     public function delete($id)
     {
         $this->authorize('modules', 'menu.destroy');
-
         $config['seo'] = __('message.menu');
-        $menu = $this->menuRepository->findById($id);
+        $menuCatalogue = $this->menuCatalogueRepository->findById($id);
         $template = 'backend.menu.menu.delete';
-        return view("backend.dashboard.layout", compact('template', 'menu', 'config'));
+        return view("backend.dashboard.layout", compact('template', 'menuCatalogue', 'config'));
     }
 
     public function destroy($id)

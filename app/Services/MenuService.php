@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Services\Interfaces\MenuServiceInterface;
 use App\Services\BaseService;
 use App\Repositories\Interfaces\MenuRepositoryInterface as MenuRepository;
+use App\Repositories\Interfaces\MenuCatalogueRepositoryInterface as MenuCatalogueRepository;
 use App\Repositories\Interfaces\RouterRepositoryInterface as RouterRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -19,12 +20,15 @@ use Illuminate\Support\Facades\Log;
 class MenuService extends BaseService implements MenuServiceInterface
 {
     protected $menuRepository;
+    protected $menuCatalogueRepository;
     protected $nestedSet;
 
     public function __construct(
         MenuRepository $menuRepository,
+        MenuCatalogueRepository $menuCatalogueRepository
     ) {
         $this->menuRepository = $menuRepository;
+        $this->menuCatalogueRepository = $menuCatalogueRepository;
         $this->controllerName = 'MenuController';
     }
 
@@ -36,11 +40,6 @@ class MenuService extends BaseService implements MenuServiceInterface
             'isMenu' => TRUE,
             'language_id' => $languageId,
         ]);
-    }
-
-    public function paginate($request): array
-    {
-        return [];
     }
 
     public function save($request, $languageId)
@@ -97,21 +96,6 @@ class MenuService extends BaseService implements MenuServiceInterface
             DB::rollBack();
             // Log::error($e->getMessage());
             echo $e->getMessage();
-            die();
-            return false;
-        }
-    }
-
-    public function update($id, $request, $languageId)
-    {
-        DB::beginTransaction();
-        try {
-
-            DB::commit();
-            return true;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error($e->getMessage());
             die();
             return false;
         }
@@ -196,13 +180,18 @@ class MenuService extends BaseService implements MenuServiceInterface
     {
         DB::beginTransaction();
         try {
+            $this->menuRepository->forceDeleteByCondition([
+                ['menu_catalogue_id', '=', $id],
+            ]);
 
+            $this->menuCatalogueRepository->forceDelete($id);
             DB::commit();
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
             // Log::error($e->getMessage());
-            // echo $e->getMessage();die();
+            echo $e->getMessage();
+            die();
             return false;
         }
     }
