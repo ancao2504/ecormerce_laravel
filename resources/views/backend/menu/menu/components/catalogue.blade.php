@@ -21,24 +21,18 @@
                                 hiển thị</button>
                         </div>
                     </div>
-                    <div class="col-lg-6">
+                    <div class="col-lg-12">
                         <select class="setupSelect2" name="menu_catalogue_id" id="" style="width: 100%;">
                             <option value="0">[Chọn vị trí hiển thị]</option>
                             @if(count($menuCatalogues))
-                                @foreach($menuCatalogues as $key => $menuCatalogue)
-                                    <option value="{{ $menuCatalogue->id }}">{{ $menuCatalogue->name }}</option>
-                                @endforeach
+                            @foreach($menuCatalogues as $key => $value)
+                            <option {{isset($menuCatalogue) && $menuCatalogue->id == $value->id ? 'selected' : ''}}
+                                value="{{ $value->id }}">{{ $value->name }}</option>
+                            @endforeach
                             @endif
                         </select>
                     </div>
 
-                    <div class="col-lg-6">
-                        <select class="setupSelect2" name="type" id="" style="width: 100%;">
-                            @foreach(__('module.type') as $key => $value)
-                                <option value="{{ $key }}">{{ $value }}</option>
-                            @endforeach
-                        </select>
-                    </div>
                 </div>
             </div>
         </div>

@@ -31,28 +31,28 @@
                     </div>
 
                     @foreach(__('module.model') as $key => $value)
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h4 class="panel-title">
-                                    <a data-toggle="collapse" data-model="{{ $key }}" data-parent="#accordion"
-                                        href="#{{$key}}" class="collapsed menu-module"
-                                        aria-expanded="false">{{ $value }}</a>
-                                </h4>
-                            </div>
-                            <div id="{{$key}}" class="panel-collapse collapse {{ $key == 'PostCatalogue' ? 'in' : '' }}"
-                                aria-expanded="false" style="">
-                                <div class="panel-body">
-                                    <input type="text" name="keyword" class="form-control search-menu"
-                                        placeholder="Tìm kiếm...">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-model="{{ $key }}" data-parent="#accordion"
+                                    href="#{{$key}}" class="collapsed menu-module"
+                                    aria-expanded="false">{{ $value }}</a>
+                            </h4>
+                        </div>
+                        <div id="{{$key}}" class="panel-collapse collapse {{ $key == 'PostCatalogue' ? 'in' : '' }}"
+                            aria-expanded="false" style="">
+                            <div class="panel-body">
+                                <input type="text" name="keyword" class="form-control search-menu"
+                                    placeholder="Tìm kiếm...">
 
-                                    <div class="menu-list mt-20">
+                                <div class="menu-list mt-20">
 
-                                        <div id="paginationMenu"></div>
-                                    </div>
-
+                                    <div id="paginationMenu"></div>
                                 </div>
+
                             </div>
                         </div>
+                    </div>
                     @endforeach
 
                 </div>
@@ -61,7 +61,7 @@
     </div>
 
     @php
-        $menu = old('menu', $menuChildren ?? null,) ?? null;
+    $menu = old('menu', ($menuChildren ?? null) ?? ($menuList ?? null),) ?? null;
     @endphp
 
     <div class="col-lg-7">
@@ -91,26 +91,26 @@
                     </div>
 
                     @if(is_array($menu) && count($menu))
-                        @foreach($menu['name'] as $key => $value)
-                            <div class="row mb-20 menu-item {{$menu['canonical'][$key]}}">
-                                <div class="col-lg-4">
-                                    <input type="text" value="{{ $value }}" class="form-control" name="menu[name][]">
-                                </div>
-                                <div class="col-lg-4">
-                                    <input type="text" value="{{ $menu['canonical'][$key] }}" class="form-control"
-                                        name="menu[canonical][]">
-                                </div>
-                                <div class="col-lg-2">
-                                    <input type="text" value="{{ $menu['order'][$key] }}" class="form-control"
-                                        name="menu[order][]">
-                                </div>
-                                <div class="col-lg-2">
-                                    <div class="form-row text-center"><a class="delete-menu"><i class="fa fa-trash"></i></a>
-                                    </div>
-                                    <input type="text" class="hidden" name="menu[id][]" value="{{$menu['id'][$key]}}" />
-                                </div>
+                    @foreach($menu['name'] as $key => $value)
+                    <div class="row mb-20 menu-item {{$menu['canonical'][$key]}}">
+                        <div class="col-lg-4">
+                            <input type="text" value="{{ $value }}" class="form-control" name="menu[name][]">
+                        </div>
+                        <div class="col-lg-4">
+                            <input type="text" value="{{ $menu['canonical'][$key] }}" class="form-control"
+                                name="menu[canonical][]">
+                        </div>
+                        <div class="col-lg-2">
+                            <input type="text" value="{{ $menu['order'][$key] }}" class="form-control"
+                                name="menu[order][]">
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-row text-center"><a class="delete-menu"><i class="fa fa-trash"></i></a>
                             </div>
-                        @endforeach
+                            <input type="text" class="hidden" name="menu[id][]" value="{{$menu['id'][$key]}}" />
+                        </div>
+                    </div>
+                    @endforeach
                     @endif
                 </div>
             </div>

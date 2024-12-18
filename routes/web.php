@@ -183,6 +183,8 @@ Route::group(['middleware' => ['admin', 'locale', 'default_backend_locale']], fu
 
         Route::get('children/{id}', [MenuController::class, 'children'])->where(['id' => '[0-9]+'])->name('menu.children');
         Route::post('saveChildren/{id}', [MenuController::class, 'saveChildren'])->where(['id' => '[0-9]+'])->name('menu.save.children');
+
+        Route::get('editMenu/{id}', [MenuController::class, 'editMenu'])->where(['id' => '[0-9]+'])->name('menu.editMenu');
     });
 
     //@@new-module@@

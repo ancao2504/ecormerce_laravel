@@ -9,7 +9,7 @@ namespace App\Repositories\Interfaces;
  */
 interface UserRepositoryInterface extends BaseRepositoryInterface
 {
-    public function findById(int $id);
+    public function findById(int $id, array $column = ['*'], array $relation = []);
     public function create(array $payload = []);
     public function update(int $id, array $payload = []);
     public function delete(int $id);

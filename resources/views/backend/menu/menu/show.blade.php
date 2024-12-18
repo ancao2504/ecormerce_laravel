@@ -23,23 +23,24 @@
             <div class="ibox">
                 <div class="ibox-title">
                     <div class="uk-flex uk-flex-middle uk-flex-space-between">
-                        <h5 style="margin: 0;">Menu chính</h5>
-                        <a href="" class="custom-button">Cập nhật Menu</a>
+                        <h5 style="margin: 0;">{{$menuCatalogue->name}}</h5>
+                        <a href="{{ route('menu.editMenu', ['id' => $id]) }}" class="custom-button">Cập
+                            nhật Menu</a>
                     </div>
                 </div>
 
                 <div class="ibox-content" id="dataCatalogue" data-catalogueId="{{ $id }}">
                     @php
-                        $menus = recursive($menus);
-                        $menuHtml = recursive_menu($menus);
+                    $menus = recursive($menus);
+                    $menuHtml = recursive_menu($menus);
                     @endphp
 
                     @if(count($menus))
-                        <div class="dd" id="nestable2">
-                            <ol class="dd-list">
-                                {!! $menuHtml !!}
-                            </ol>
-                        </div>
+                    <div class="dd" id="nestable2">
+                        <ol class="dd-list">
+                            {!! $menuHtml !!}
+                        </ol>
+                    </div>
                     @endif
                 </div>
             </div>

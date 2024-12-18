@@ -43,26 +43,39 @@ class MenuService extends BaseService implements MenuServiceInterface
         return [];
     }
 
-    public function create($request, $languageId)
+    public function save($request, $languageId)
     {
         DB::beginTransaction();
         try {
-            $payload = $request->only('menu', 'menu_catalogue_id', 'type');
+            $payload = $request->only('menu', 'menu_catalogue_id');
 
             if (count($payload['menu']['name'])) {
                 foreach ($payload['menu']['name'] as $key => $value) {
+                    $menuId = $payload['menu']['id'][$key];
                     $menuArray = [
                         'menu_catalogue_id' => $payload['menu_catalogue_id'],
-                        'type' => $payload['type'],
                         'order' => $payload['menu']['order'][$key],
                         'user_id' => Auth::id(),
                     ];
 
-                    $menu = $this->menuRepository->create($menuArray);
+                    if ($menuId == 0) {
+                        $menuSave = $this->menuRepository->create($menuArray);
+                    } else {
+                        $menuSave = $this->menuRepository->update($menuId, $menuArray);
+                        if ($menuSave->rgt - $menuSave->lft > 1) {
+                            $this->menuRepository->updateByWhere(
+                                [
+                                    ['lft', '>', $menuSave->lft],
+                                    ['rgt', '<', $menuSave->rgt],
+                                ],
+                                ['menu_catalogue_id' => $payload['menu_catalogue_id']]
+                            );
+                        }
+                    }
 
-                    if ($menu->id > 0) {
+                    if ($menuSave->id > 0) {
                         DB::table('menu_language') // Tên bảng pivot
-                            ->where('menu_id', $menu->id)
+                            ->where('menu_id', $menuSave->id)
                             ->where('language_id', $languageId)
                             ->delete();
                         $payloadLanguage = [
@@ -70,7 +83,7 @@ class MenuService extends BaseService implements MenuServiceInterface
                             'name' => $value,
                             'canonical' => $payload['menu']['canonical'][$key],
                         ];
-                        $this->menuRepository->createPivot($menu, $payloadLanguage, 'languages');
+                        $this->menuRepository->createPivot($menuSave, $payloadLanguage, 'languages');
                     }
                 }
 
@@ -104,19 +117,12 @@ class MenuService extends BaseService implements MenuServiceInterface
         }
     }
 
-    public function getAndConvertMenu($menu = null, $language = 1)
+    public function convertMenu($menuList = null)
     {
-
-        $menuChildren = $this->menuRepository->findByCondition([['parent_id', '=', $menu->id]], TRUE, [
-            'languages' => function ($query) use ($language) {
-                $query->where('language_id', $language);
-            }
-        ]);
-
         $temp = [];
         $fields = ['name', 'canonical', 'order', 'id'];
-        if (count($menuChildren)) {
-            foreach ($menuChildren as $key => $val) {
+        if (count($menuList)) {
+            foreach ($menuList as $key => $val) {
                 foreach ($fields as $field) {
                     if ($field == 'name' || $field == 'canonical') {
                         $temp[$field][] = $val->languages()->first()->pivot->{$field};
@@ -126,8 +132,18 @@ class MenuService extends BaseService implements MenuServiceInterface
                 }
             }
         }
-
         return $temp;
+    }
+
+    public function getAndConvertMenu($menu = null, $language = 1)
+    {
+        $menuList = $this->menuRepository->findByCondition([['parent_id', '=', $menu->id]], TRUE, [
+            'languages' => function ($query) use ($language) {
+                $query->where('language_id', $language);
+            }
+        ]);
+
+        return $this->convertMenu($menuList);
     }
 
     public function saveChildren($request, $languageId, $menu)
@@ -150,7 +166,6 @@ class MenuService extends BaseService implements MenuServiceInterface
                     } else {
                         $menuSave = $this->menuRepository->update($menuId, $menuArray);
                     }
-
                     if ($menuSave->id > 0) {
                         $menuSave->languages()->detach([$languageId, $menuSave->id]);
                         $payloadLanguage = [
