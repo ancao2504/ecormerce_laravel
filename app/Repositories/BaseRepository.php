@@ -72,6 +72,15 @@ class BaseRepository implements BaseRepositoryInterface
         return $flag == false ? $query->first() : $query->get();
     }
 
+    public function findByWhereHas(array $condition = [], string $relation = '', string $alias = '')
+    {
+        return $this->model->with('languages')->whereHas($relation, function ($query) use ($condition, $alias) {
+            foreach ($condition as $key => $value) {
+                $query->where($alias . '.' . $key, $value);
+            }
+        })->first();
+    }
+
     public function update(int $id = 0, array $payload = [])
     {
         $model = $this->findById($id);

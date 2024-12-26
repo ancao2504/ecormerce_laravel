@@ -22,13 +22,16 @@ class MenuService extends BaseService implements MenuServiceInterface
     protected $menuRepository;
     protected $menuCatalogueRepository;
     protected $nestedSet;
+    protected $routerRepository;
 
     public function __construct(
         MenuRepository $menuRepository,
-        MenuCatalogueRepository $menuCatalogueRepository
+        MenuCatalogueRepository $menuCatalogueRepository,
+        RouterRepository $routerRepository
     ) {
         $this->menuRepository = $menuRepository;
         $this->menuCatalogueRepository = $menuCatalogueRepository;
+        $this->routerRepository = $routerRepository;
         $this->controllerName = 'MenuController';
     }
 
@@ -214,5 +217,75 @@ class MenuService extends BaseService implements MenuServiceInterface
 
         $this->initialize($languageId);
         $this->nestedSet();
+    }
+
+    public function findMenuItemTranslate($menus, int $currentLanguage = 1, int $languageId = 1)
+    {
+        $output = [];
+        if (count($menus)) {
+            foreach ($menus as $key => $menu) {
+                $canonical = $menu->languages()->first()->pivot->canonical;
+                $router = $this->routerRepository->findByCondition([
+                    ['canonical', '=', $canonical],
+                ]);
+
+                if ($router) {
+                    $controller = explode('\\', $router->controllers);
+                    $model = str_replace('Controller', '', end($controller));
+                    $repositoryInterfaceNamespace = 'App\Repositories\\'  . $model . 'Repository';
+                    if (class_exists($repositoryInterfaceNamespace)) {
+                        $repositoryInstance = app($repositoryInterfaceNamespace);
+                    }
+
+
+                    $alias = Str::snake($model) . '_language';
+                    $object = $repositoryInstance->findByWhereHas([
+                        'canonical' => $canonical,
+                        'language_id' => $currentLanguage,
+                    ], 'languages', $alias);
+                    if ($object) {
+                        $translateObject = $object->languages()->where('language_id', $languageId)->first([$alias . '.name', $alias . '.canonical']);
+                        if (!is_null($translateObject)) {
+                            $menu->translate_name = $translateObject->name;
+                            $menu->translate_canonical = $translateObject->canonical;
+                        }
+                    }
+                }
+
+                $output[] = $menu;
+            }
+        }
+        return $output;
+    }
+
+    public function saveTranslateMenu($request, int $languageId = 1)
+    {
+        DB::beginTransaction();
+        try {
+            $payload = $request->only('translate');
+            if (count($payload['translate']['name'])) {
+                foreach ($payload['translate']['name'] as $key => $value) {
+                    if ($value == null) continue;
+                    $temp = [
+                        'language_id' => $languageId,
+                        'name' => $value,
+                        'canonical' => $payload['translate']['canonical'][$key],
+                    ];
+                    $menu = $this->menuRepository->findById($payload['translate']['id'][$key]);
+
+                    $menu->languages()->detach($languageId);
+                    $this->menuRepository->createPivot($menu, $temp, 'languages');
+                }
+            }
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Log::error($e->getMessage());
+            echo $e->getMessage();
+            die();
+            return false;
+        }
     }
 }

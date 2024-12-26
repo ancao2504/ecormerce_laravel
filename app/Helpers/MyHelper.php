@@ -138,3 +138,27 @@ if (!function_exists('recursive_menu')) {
         return $html;
     }
 }
+
+if (!function_exists('buildMenu')) {
+    function buildMenu($menus = null, $parent_id = 0, $prefix = '')
+    {
+        $output = [];
+        $count = 1;
+
+        if (count($menus)) {
+            foreach ($menus as $key => $value) {
+                if ($value->parent_id == $parent_id) {
+                    $value->position = $prefix . $count;
+                    $output[] = $value;
+                    $output = array_merge(
+                        $output,
+                        buildMenu($menus, $value->id, $value->position . '.')
+                    );
+                    $count++;
+                }
+            }
+        }
+
+        return $output;
+    }
+}

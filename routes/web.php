@@ -185,6 +185,21 @@ Route::group(['middleware' => ['admin', 'locale', 'default_backend_locale']], fu
         Route::post('saveChildren/{id}', [MenuController::class, 'saveChildren'])->where(['id' => '[0-9]+'])->name('menu.save.children');
 
         Route::get('editMenu/{id}', [MenuController::class, 'editMenu'])->where(['id' => '[0-9]+'])->name('menu.editMenu');
+
+        Route::get(
+            'translate/{languageId}/{id}',
+            [MenuController::class, 'translate']
+        )->where([
+            'languageId' => '[0-9]+',
+            'id' => '[0-9]+'
+        ])->name('menu.translate');
+
+        Route::post(
+            'saveTranslate/{languageId}',
+            [MenuController::class, 'saveTranslate']
+        )->where([
+            'languageId' => '[0-9]+',
+        ])->name('menu.translate.save');
     });
 
     //@@new-module@@
@@ -203,7 +218,6 @@ Route::group(['middleware' => ['admin', 'locale', 'default_backend_locale']], fu
 
     Route::get('ajax/dashboard/getMenu', [AjaxDashboardController::class, 'getMenu'])->name('ajax.dashboard.getMenu');
     Route::post('ajax/menu/drag', [AjaxMenuController::class, 'drag'])->name('ajax.menu.drag');
-
 });
 
 

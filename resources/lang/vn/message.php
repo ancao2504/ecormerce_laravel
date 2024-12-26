@@ -15,6 +15,9 @@ return [
         'delete' => [
             'title' => 'Xóa menu'
         ],
+        'translate' => [
+            'title' => 'Tạo bản dịch {language} cho menu'
+        ],
     ],
     'system' => [
         'index' => [

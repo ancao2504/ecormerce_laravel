@@ -30,4 +30,5 @@ interface BaseRepositoryInterface
     public function insertBatch(array $payload = []);
     public function updateOrInsert(array $payload = [], array $condition = []);
     public function findByCondition($condition = [], $flag = false, $relation = [], $orderBy = ['id', 'DESC']);
+    public function findByWhereHas(array $condition = [], string $relation = '', string $alias = '');
 }

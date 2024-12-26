@@ -7,11 +7,14 @@ use App\Services\Interfaces\MenuServiceInterface as MenuService;
 use App\Repositories\Interfaces\MenuRepositoryInterface as MenuRepository;
 use App\Repositories\Interfaces\MenuCatalogueRepositoryInterface as MenuCatalogueRepository;
 use App\Services\Interfaces\MenuCatalogueServiceInterface as MenuCatalogueService;
+use App\Repositories\Interfaces\LanguageRepositoryInterface as LanguageRepository;
 use App\Http\Requests\StoreMenuChildrenRequest;
 use App\Http\Requests\StoreMenuRequest;
 use App\Http\Requests\UpdateMenuRequest;
 use Illuminate\Http\Request;
 use App\Models\Language;
+
+use function Symfony\Component\String\b;
 
 class MenuController extends Controller
 {
@@ -20,17 +23,20 @@ class MenuController extends Controller
     protected $menuCatalogueRepository;
     protected $language;
     protected $menuCatalogueService;
+    protected $languageRepository;
 
     public function __construct(
         MenuService $menuService,
         MenuRepository $menuRepository,
         MenuCatalogueRepository $menuCatalogueRepository,
-        MenuCatalogueService $menuCatalogueService
+        MenuCatalogueService $menuCatalogueService,
+        LanguageRepository $languageRepository
     ) {
         $this->menuService = $menuService;
         $this->menuRepository = $menuRepository;
         $this->menuCatalogueRepository = $menuCatalogueRepository;
         $this->menuCatalogueService = $menuCatalogueService;
+        $this->languageRepository = $languageRepository;
         $this->middleware(function ($request, $next) {
             $locale = app()->getLocale(); // vn en cn
             $language = Language::where('canonical', $locale)->first();
@@ -185,6 +191,45 @@ class MenuController extends Controller
             return redirect()->route('menu.index')->with('success', 'Đã xoá người dùng');
         }
         return redirect()->route('menu.index')->with('error', 'Đã xảy ra lỗi khi xoá người dùng');
+    }
+
+    public function translate(int $languageId = 1, int $id = 0)
+    {
+        $language = $this->languageRepository->findById($languageId);
+        $currentLanguage = $this->language;
+        $menuCatalogue = $this->menuCatalogueRepository->findById($id);
+        $menus = $this->menuRepository->findByCondition([
+            ['menu_catalogue_id', '=', $id],
+        ], TRUE, [
+            'languages' => function ($query) use ($currentLanguage) {
+                $query->where('language_id', $currentLanguage);
+            }
+        ], ['lft', 'ASC']);
+        $menus = buildMenu($this->menuService->findMenuItemTranslate($menus, $currentLanguage, $languageId));
+        $config = $this->configData();
+        $config['seo'] = __('message.menu');
+        $config['method'] = 'translate';
+
+        $template = 'backend.menu.menu.translate';
+        return view(
+            'backend.dashboard.layout',
+            compact(
+                'template',
+                'config',
+                'language',
+                'languageId',
+                'menuCatalogue',
+                'menus'
+            )
+        );
+    }
+
+    public function saveTranslate(Request $request, $languageId = 1)
+    {
+        if ($this->menuService->saveTranslateMenu($request, $languageId)) {
+            return redirect()->route('menu.index')->with("success", "Đã lưu thành công");
+        }
+        return redirect()->route("menu.index")->with("error", "Đã xảy ra lỗi khi, hãy thử lại sau!");
     }
 
     private function configData()
