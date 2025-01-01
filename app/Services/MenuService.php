@@ -225,29 +225,41 @@ class MenuService extends BaseService implements MenuServiceInterface
         if (count($menus)) {
             foreach ($menus as $key => $menu) {
                 $canonical = $menu->languages()->first()->pivot->canonical;
-                $router = $this->routerRepository->findByCondition([
-                    ['canonical', '=', $canonical],
-                ]);
 
-                if ($router) {
-                    $controller = explode('\\', $router->controllers);
-                    $model = str_replace('Controller', '', end($controller));
-                    $repositoryInterfaceNamespace = 'App\Repositories\\'  . $model . 'Repository';
-                    if (class_exists($repositoryInterfaceNamespace)) {
-                        $repositoryInstance = app($repositoryInterfaceNamespace);
-                    }
+                $detailMenu = $this->menuRepository->findById($menu->id, ['*'], ['languages' => function ($query) use ($languageId) {
+                    $query->where('language_id', $languageId);
+                }]);
+
+                if ($detailMenu) {
+                    if ($detailMenu->languages->isNotEmpty()) {
+                        $menu->translate_name = $detailMenu->languages()->first()->pivot->name;
+                        $menu->translate_canonical = $detailMenu->languages()->first()->pivot->canonical;
+                    } else {
+                        $router = $this->routerRepository->findByCondition([
+                            ['canonical', '=', $canonical],
+                        ]);
+
+                        if ($router) {
+                            $controller = explode('\\', $router->controllers);
+                            $model = str_replace('Controller', '', end($controller));
+                            $repositoryInterfaceNamespace = 'App\Repositories\\'  . $model . 'Repository';
+                            if (class_exists($repositoryInterfaceNamespace)) {
+                                $repositoryInstance = app($repositoryInterfaceNamespace);
+                            }
 
 
-                    $alias = Str::snake($model) . '_language';
-                    $object = $repositoryInstance->findByWhereHas([
-                        'canonical' => $canonical,
-                        'language_id' => $currentLanguage,
-                    ], 'languages', $alias);
-                    if ($object) {
-                        $translateObject = $object->languages()->where('language_id', $languageId)->first([$alias . '.name', $alias . '.canonical']);
-                        if (!is_null($translateObject)) {
-                            $menu->translate_name = $translateObject->name;
-                            $menu->translate_canonical = $translateObject->canonical;
+                            $alias = Str::snake($model) . '_language';
+                            $object = $repositoryInstance->findByWhereHas([
+                                'canonical' => $canonical,
+                                'language_id' => $currentLanguage,
+                            ], 'languages', $alias);
+                            if ($object) {
+                                $translateObject = $object->languages()->where('language_id', $languageId)->first([$alias . '.name', $alias . '.canonical']);
+                                if (!is_null($translateObject)) {
+                                    $menu->translate_name = $translateObject->name;
+                                    $menu->translate_canonical = $translateObject->canonical;
+                                }
+                            }
                         }
                     }
                 }
