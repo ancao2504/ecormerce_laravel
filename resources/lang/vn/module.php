@@ -10,5 +10,18 @@ return [
     'type' => [
         'dropdown-menu' => 'Dropdown Menu',
         'mega-menu' => 'Mega Menu'
+    ],
+    'effect' => [
+        'fade' => 'Fade',
+        'cube' => 'Cube',
+        'coverflow' => 'CoverFlow',
+        'flip' => 'Flip',
+        'cards' => 'Cards',
+        'creative' => 'Creative'
+    ],
+    'navigate' => [
+        'hide' => 'Ẩn thanh điều hướng',
+        'dots' => 'Hiển thị dạng dấu chấm',
+        'thumbnails' => 'Hiển thị dạng ảnh thumbnail',
     ]
 ];

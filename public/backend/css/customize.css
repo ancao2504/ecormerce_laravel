@@ -438,3 +438,103 @@ table strong {
 .menu-translate-item .form-row:not(:last-child) {
     margin-bottom: 10px;
 }
+
+.setting-item {
+    margin-bottom: 15px;
+}
+
+.setting-item .setting-value {
+    position: relative;
+    width: 100%;
+}
+
+.setting-item .setting-value .form-control {
+    padding-right: 25px;
+}
+
+.setting-item .setting-value .px {
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    font-size: 12px;
+    color: blue;
+}
+
+.setting-item .setting-value input[type="radio"],
+.setting-item .setting-value input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.setting-item .setting-value label {
+    font-weight: normal;
+    margin-bottom: 0;
+    margin-left: 10px;
+}
+
+.nav-setting-item {
+    margin-bottom: 10px;
+}
+
+.setting-item .setting-text {
+    min-width: 120px;
+}
+
+.ibox .ibox-title h5 {
+    margin-bottom: 0;
+}
+
+.custom-row [class*="col-"] {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.form-row .overlay label {
+    font-weight: normal;
+    margin: 0 10px 0 0;
+}
+
+.form-row .overlay input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.form-row-url {
+    padding-right: 160px;
+    position: relative;
+}
+
+.form-row .overlay {
+    position: absolute;
+    top: 7px;
+    right: 0;
+}
+
+.slide-seo-tab {
+    padding-right: 0;
+}
+
+.slide-list .sort .ui-state-default {
+    width: 100% !important;
+}
+
+.slide-image {
+    position: relative;
+}
+
+.slide-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.delete-slide {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+    padding: 10px;
+    background-color: #b8b2b2;
+}

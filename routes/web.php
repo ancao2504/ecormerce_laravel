@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Ajax\LocationController;
+use App\Http\Controllers\Backend\SlideController;
 use App\Http\Controllers\Backend\SystemController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Backend\AuthController;
@@ -200,6 +201,17 @@ Route::group(['middleware' => ['admin', 'locale', 'default_backend_locale']], fu
         )->where([
             'languageId' => '[0-9]+',
         ])->name('menu.translate.save');
+    });
+
+
+    Route::group(['prefix' => 'slide'], function () {
+        Route::get('index', [SlideController::class, 'index'])->name('slide.index');
+        Route::get('create', [SlideController::class, 'create'])->name('slide.create');
+        Route::post('store', [SlideController::class, 'store'])->name('slide.store');
+        Route::get('edit/{id}', [SlideController::class, 'edit'])->where('id', '[0-9]+')->name('slide.edit');
+        Route::post('update/{id}', [SlideController::class, 'update'])->where('id', '[0-9]+')->name('slide.update');
+        Route::get('delete/{id}', [SlideController::class, 'delete'])->where('id', '[0-9]+')->name('slide.delete');
+        Route::post('destroy/{id}', [SlideController::class, 'destroy'])->where('id', '[0-9]+')->name('slide.destroy');
     });
 
     //@@new-module@@

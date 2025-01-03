@@ -1,5 +1,21 @@
 <?php
 return [
+    'slide' => [
+        'index' => [
+            'title' => 'Quản lý slide',
+            'tableHeading' => 'Danh sách slide',
+        ],
+        'create' => [
+            'title' => 'Thêm mới slide',
+            'children' => 'Quản lý slide con'
+        ],
+        'show' => [
+            'title' => 'Danh sách slide'
+        ],
+        'delete' => [
+            'title' => 'Xóa slide'
+        ],
+    ],
     'menu' => [
         'index' => [
             'title' => 'Quản lý menu',
