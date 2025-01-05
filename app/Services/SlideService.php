@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
  * Class SlideService
  * @package App\Services
  */
-class SlideService implements SlideServiceInterface
+class SlideService extends BaseService implements SlideServiceInterface
 {
     protected $slideRepository;
     public function __construct(SlideRepository $slideRepository)
@@ -47,16 +47,29 @@ class SlideService implements SlideServiceInterface
         return $slides;
     }
 
-    public function create(Request $request)
+    private function handleItem($request, $languageId)
+    {
+        $slide = $request->input('slide');
+        $temp = [];
+        foreach ($slide['image'] as $key => $value) {
+            $temp[$languageId][] = [
+                'image' => $value,
+                'name' => $slide['name'][$key],
+                'description' => $slide['description'][$key],
+                'url' => $slide['url'][$key],
+                'alt' => $slide['alt'][$key],
+                'window' => isset($slide['window'][$key]) ? $slide['window'][$key] : '',
+            ];
+        }
+        return $temp;
+    }
+
+    public function create(Request $request, $languageId)
     {
         DB::beginTransaction();
         try {
-            $payload = $request->except(['_token', 'send', 're_password']);
-            if ($payload['birthday'] != null) {
-                $payload['birthday'] = $this->convertBirthdayDate($payload['birthday']);
-            }
-            $payload['password'] = $payload['password'] ? Hash::make($payload['password']) : null;
-
+            $payload = $request->only(['_token', 'name', 'keyword', 'setting', 'short_code']);
+            $payload['item'] = $this->handleItem($request, $languageId);
             $slide = $this->slideRepository->create($payload);
             DB::commit();
             return true;
@@ -69,14 +82,28 @@ class SlideService implements SlideServiceInterface
         }
     }
 
-    public function update($id, Request $request)
+    public function convertSlideArray(array $slide = [])
+    {
+        $temp = [];
+        $fields = ['name', 'image', 'description', 'url', 'alt', 'window'];
+        foreach ($slide as $key => $value) {
+            foreach ($fields as $field) {
+                $temp[$field][] = $value[$field];
+            }
+        }
+
+        return $temp;
+    }
+
+    public function update($id, Request $request, $languageId)
     {
         DB::beginTransaction();
         try {
-            $payload = $request->except(['_token', 'send']);
-            if ($payload['birthday'] != null) {
-                $payload['birthday'] = $this->convertBirthdayDate($payload['birthday']);
-            }
+            $slide = $this->slideRepository->findById($id);
+            $slideItem = $slide->item[$languageId];
+            unset($slideItem[$languageId]);
+            $payload = $request->only(['_token', 'name', 'keyword', 'setting', 'short_code']);
+            $payload['item'] = $this->handleItem($request, $languageId) + $slideItem;
             $slide = $this->slideRepository->update($id, $payload);
             DB::commit();
             return true;
@@ -89,55 +116,11 @@ class SlideService implements SlideServiceInterface
         }
     }
 
-    private function convertBirthdayDate($birthday = '')
-    {
-        $carbonDate = Carbon::createFromFormat('Y-m-d', $birthday);
-        $birthday = $carbonDate->format('Y-m-d H:i:s');
-
-        return $birthday;
-    }
-
     public function destroy($id)
     {
         DB::beginTransaction();
         try {
             $slide = $this->slideRepository->forceDelete($id);
-            DB::commit();
-            return true;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            // Log::error($e->getMessage());
-            echo $e->getMessage();
-            die();
-            return false;
-        }
-    }
-
-    public function updateStatus($status = [])
-    {
-        DB::beginTransaction();
-        try {
-            $field = $status['field'];
-            $payload = [$field => $status['value'] == 1 ? 2 : 1];
-            $slide = $this->slideRepository->update($status['modelId'], $payload);
-            DB::commit();
-            return true;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            // Log::error($e->getMessage());
-            echo $e->getMessage();
-            die();
-            return false;
-        }
-    }
-
-    public function updateStatusAll($status = [])
-    {
-        DB::beginTransaction();
-        try {
-            $field = $status['field'];
-            $payload = [$field => $status['value'] == 1 ? 2 : 1];
-            $flag = $this->slideRepository->updateByWhereIn('id', $status['ids'], $payload);
             DB::commit();
             return true;
         } catch (\Exception $e) {

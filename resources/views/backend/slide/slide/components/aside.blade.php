@@ -30,7 +30,7 @@
                     <div class="uk-flex uk-flex-middle">
                         <div class="setting-text">Chiều rộng</div>
                         <div class="setting-value">
-                            <input type="text" name="setting[width]" class="form-control" value="0">
+                            <input type="text" name="setting[width]" class="form-control int" value="{{old('setting.width', $slide->setting['width'] ?? 0)}}">
                             <span class="px">px</span>
                         </div>
                     </div>
@@ -40,7 +40,7 @@
                     <div class="uk-flex uk-flex-middle">
                         <div class="setting-text">Chiều cao</div>
                         <div class="setting-value">
-                            <input type="text" name="setting[height]" class="form-control" value="0">
+                            <input type="text" name="setting[height]" class="form-control int" value="{{old('setting.height', $slide->setting['height'] ?? 0)}}">
                             <span class="px">px</span>
                         </div>
                     </div>
@@ -52,7 +52,11 @@
                         <div class="setting-value">
                             <select name="setting[animation]" id="" class="form-control">
                                 @foreach (__('module.effect') as $key => $value)
-                                <option value="{{ $key }}">{{ $value }}</option>
+                                <option
+                                    {{
+                                        $key == old('setting.animation', $slide->setting['animation'] ?? null) ? 'selected' : ''
+                                    }}
+                                    value="{{ $key }}">{{ $value }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -63,10 +67,12 @@
                     <div class="uk-flex uk-flex-middle">
                         <div class="setting-text">Mũi tên</div>
                         <div class="setting-value">
-                            <input type="checkbox" name="setting[arrow]" value="accept" checked>
+                            <input type="checkbox" name="setting[arrow]" value="accept"
+                                {{ old('setting.arrow', $slide->setting['arrow'] ?? null) == 'accept' ? 'checked' : '' }}>
                         </div>
                     </div>
                 </div>
+
 
                 <div class="setting-item">
                     <div class="uk-flex uk-flex-middle">
@@ -77,9 +83,9 @@
                                 <input
                                     type="radio"
                                     name="setting[navigate]"
-                                    value="{{$value}}"
+                                    value="{{$key}}"
                                     id="navigate-{{ $key }}"
-                                    {{old('setting.navigate', 'dots')  === $key ? 'checked' : ''}}>
+                                    {{old('setting.navigate', (!old() ? $slide->setting['navigate'] ?? null : null))  === $key ? 'checked' : ''}}>
                                 <label for="navigate-{{ $key }}">{{ $value }}</label>
                             </div>
                             @endforeach
@@ -106,7 +112,7 @@
             <div class="uk-flex uk-flex-middle">
                 <span class="setting-text">Tự động chạy</span>
                 <div class="setting-value">
-                    <input type="checkbox" name="setting[autoplay]" value="accept">
+                    <input type="checkbox" name="setting[autoplay]" value="accept" {{ old('setting.autoplay', $slide->setting['autoplay'] ?? null) == 'accept' ? 'checked' : '' }}>
                 </div>
             </div>
         </div>
@@ -115,7 +121,7 @@
             <div class="uk-flex uk-flex-middle">
                 <span class="setting-text">Dừng khi di chuột</span>
                 <div class="setting-value">
-                    <input type="checkbox" name="setting[pauseOnHover]" value="">
+                    <input type="checkbox" name="setting[pauseOnHover]" value="accept" {{ old('setting.pauseOnHover', $slide->setting['pauseOnHover'] ?? null) == 'accept' ? 'checked' : '' }}>
                 </div>
             </div>
         </div>
@@ -124,7 +130,7 @@
             <div class="uk-flex uk-flex-middle">
                 <span class="setting-text">Thời gian chuyển ảnh</span>
                 <div class="setting-value">
-                    <input type="text" name="setting[animationDelay]" value="" class="form-control">
+                    <input type="text" name="setting[animationDelay]" value="{{old('setting.animationDelay', $slide->setting['animationDelay'] ?? null)}}" class="form-control">
                     <span class="px">ms</span>
                 </div>
             </div>
@@ -134,7 +140,7 @@
             <div class="uk-flex uk-flex-middle">
                 <span class="setting-text">Tốc độ hiệu ứng</span>
                 <div class="setting-value">
-                    <input type="text" name="setting[animationSpeed]" value="" class="form-control">
+                    <input type="text" name="setting[animationSpeed]" value="{{old('setting.animationSpeed', $slide->setting['animationSpeed'] ?? null)}}" class="form-control">
                     <span class="px">ms</span>
                 </div>
             </div>
@@ -148,6 +154,6 @@
     </div>
 
     <div class="ibox-content">
-        <textarea name="short-code" id="" class="textarea form-control"></textarea>
+        <textarea name="short_code" id="" class="textarea form-control">{{ old('short_code', $slide->short_code ?? '') }}</textarea>
     </div>
 </div>

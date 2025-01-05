@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('keyword')->unique();
             $table->text('description')->nullable();
             $table->longText('item');
+            $table->longText('setting');
+            $table->string('short_code');
+            $table->tinyInteger('publish')->default(0);
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });

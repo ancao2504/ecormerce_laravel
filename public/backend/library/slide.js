@@ -46,7 +46,7 @@
                         <div class="col-sm-3">
                             <div class="slide-image">
                                 <img src="${image}" alt="">
-                                <input type="hidden" name="slide[title][] value="${image}">
+                                <input type="hidden" name="slide[image][]" value="${image}">
                                 <span class="delete-slide"><i class="fa fa-trash"></i></span>
                             </div>
                         </div>
@@ -68,7 +68,7 @@
                                                 <div class="overlay">
                                                     <div class="uk-flex uk-flex-middle">
                                                         <label for="input_${tab_1}">Mở trong tab mới</label>
-                                                        <input type="checkbox" name="_blank" value="" id="input_${tab_1}" name="slide[window][]">
+                                                        <input type="checkbox" value="_blank" id="input_${tab_1}" name="slide[window][]">
                                                     </div>
                                                 </div>
                                             </div>

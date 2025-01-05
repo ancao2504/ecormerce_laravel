@@ -7,24 +7,31 @@ use App\Services\Interfaces\SlideServiceInterface as SlideService;
 use App\Repositories\Interfaces\SlideRepositoryInterface as SlideRepository;
 use App\Http\Requests\StoreSlideRequest;
 use App\Http\Requests\UpdateSlideRequest;
+use App\Models\Language;
 use Illuminate\Http\Request;
 
 class SlideController extends Controller
 {
     protected $slideService;
     protected $slideRepository;
-
+    protected $language;
     public function __construct(SlideService $slideService, SlideRepository $slideRepository)
     {
         $this->slideService = $slideService;
         $this->slideRepository = $slideRepository;
+        $this->middleware(function ($request, $next) {
+            $locale = app()->getLocale();
+            $language = Language::where('canonical', $locale)->first();
+            $this->language = $language->id;
+            return $next($request);
+        });
     }
 
     public function index(Request $request)
     {
         $this->authorize('modules', 'slide.index');
         $slides = $this->slideService->paginate($request);
-
+        $language = $this->language;
         $config = [
             'js' => [
                 'backend/js/plugins/switchery/switchery.js',
@@ -40,7 +47,7 @@ class SlideController extends Controller
         $config['seo'] = __('message.slide');
 
         $template = 'backend.slide.slide.index';
-        return view("backend.dashboard.layout", compact('template', 'config', 'slides'));
+        return view("backend.dashboard.layout", compact('template', 'config', 'slides', 'language'));
     }
 
     public function create()
@@ -48,7 +55,6 @@ class SlideController extends Controller
         $this->authorize('modules', 'slide.create');
 
         $config = $this->configData();
-
         $config['seo'] = __('message.slide');
         $config['method'] = 'create';
 
@@ -58,27 +64,27 @@ class SlideController extends Controller
 
     public function store(StoreSlideRequest $request)
     {
-        if ($this->slideService->create($request)) {
-            return redirect()->route('slide.index')->with("success", "Đã thêm người dùng");
+        if ($this->slideService->create($request, $this->language)) {
+            return redirect()->route('slide.index')->with("success", "Đã thêm slide");
         }
-        return redirect()->route("slide.create")->with("error", "Đã xảy ra lỗi khi thêm người dùng");
+        return redirect()->route("slide.create")->with("error", "Đã xảy ra lỗi khi thêm slide");
     }
 
     public function edit($id)
     {
-        $this->authorize('modules', 'slide.update');
-
+        $this->authorize('modules', 'slide.edit');
         $slide = $this->slideRepository->findById($id);
+        $slideItem = $this->slideService->convertSlideArray($slide->item[$this->language]);
         $config = $this->configData();
         $config['seo'] = __('message.slide');
         $config['method'] = 'edit';
         $template = 'backend.slide.slide.store';
-        return view('backend.dashboard.layout', compact('template', 'config', 'provinces', 'slide'));
+        return view('backend.dashboard.layout', compact('template', 'config', 'slide', 'slideItem'));
     }
 
     public function update($id, UpdateSlideRequest $request)
     {
-        if ($this->slideService->update($id, $request)) {
+        if ($this->slideService->update($id, $request, $this->language)) {
             return redirect()->route('slide.index')->with('success', 'Cập nhật thông tin thành công.');
         }
         return redirect()->route('slide.edit', $id)->with('error', 'Đã xảy ra lỗi khi cập nhật. Vui lòng thử lại sau.');
@@ -87,7 +93,6 @@ class SlideController extends Controller
     public function delete($id)
     {
         $this->authorize('modules', 'slide.destroy');
-
         $config['seo'] = __('message.slide');
         $slide = $this->slideRepository->findById($id);
         $template = 'backend.slide.slide.delete';

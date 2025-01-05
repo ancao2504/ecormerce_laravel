@@ -6,6 +6,7 @@ use App\Traits\QueryScopes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Slide extends Model
 {
     use HasFactory, SoftDeletes, QueryScopes;
@@ -14,18 +15,16 @@ class Slide extends Model
         'name',
         'description',
         'keyword',
-        'image',
-        'icon',
-        'album',
+        'setting',
+        'item',
+        'short_code',
         'publish',
-        'order',
-        'user_id',
     ];
 
-    public function languages()
-    {
-        return $this->belongsToMany(Language::class, 'menu_language', 'menu_id', 'language_id')
-            ->withPivot('menu_id', 'language_id', 'name', 'canonical');
-    }
+    protected $table = 'slides';
 
+    protected $casts = [
+        'setting' => 'json',
+        'item' => 'json',
+    ];
 }

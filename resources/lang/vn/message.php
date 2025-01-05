@@ -9,6 +9,9 @@ return [
             'title' => 'Thêm mới slide',
             'children' => 'Quản lý slide con'
         ],
+        'edit' => [
+            'title' => 'Cập nhật slide'
+        ],
         'show' => [
             'title' => 'Danh sách slide'
         ],
